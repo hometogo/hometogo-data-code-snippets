@@ -1,0 +1,41 @@
+slice_name: monitoring.superset_naming_conventions_share
+viz_type: gauge_chart
+params:
+  adhoc_filters: []
+  animation: true
+  color_scheme: htg_color_scheme
+  datasource: 479__table
+  end_angle: -45
+  extra_form_data: {}
+  font_size: 20
+  granularity_sqla: null
+  groupby: []
+  interval_color_indices: 1,5
+  intervals: 0.9,1
+  max_val: 1
+  metric: share_correct_naming
+  min_val: '0'
+  number_format: ',.1%'
+  overlap: true
+  round_cap: true
+  row_limit: 10000
+  show_axis_tick: false
+  show_pointer: true
+  show_progress: false
+  show_split_line: true
+  slice_id: 634
+  split_number: 10
+  start_angle: 225
+  time_range: Last quarter
+  time_range_endpoints:
+  - inclusive
+  - exclusive
+  url_params: {}
+  value_formatter: '{value}'
+  viz_type: gauge_chart
+query_context: '{"datasource":{"id":479,"type":"table"},"force":false,"queries":[{"time_range":"Last
+  quarter","granularity":null,"filters":[],"extras":{"time_range_endpoints":["inclusive","exclusive"],"having":"","having_druid":[],"where":""},"applied_time_extras":{},"columns":[],"metrics":["share_correct_naming"],"annotation_layers":[],"row_limit":10000,"timeseries_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{},"groupby":[]}],"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: 69f387e7-d2a4-4fc2-938b-f9aa33522791
+version: 1.0.0
+dataset_uuid: b4926ff8-d5dc-4669-8bc6-2d5336813f48

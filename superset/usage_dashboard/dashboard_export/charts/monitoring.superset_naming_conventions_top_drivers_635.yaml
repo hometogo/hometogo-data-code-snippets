@@ -1,0 +1,40 @@
+slice_name: monitoring.superset_naming_conventions_top_drivers
+viz_type: table
+params:
+  adhoc_filters: []
+  all_columns: []
+  color_pn: false
+  column_config:
+    share_correct_naming:
+      d3SmallNumberFormat: ',.1%'
+  conditional_formatting: []
+  datasource: 479__table
+  extra_form_data: {}
+  groupby:
+  - owner
+  include_search: true
+  metrics:
+  - count
+  - share_correct_naming
+  order_by_cols: []
+  order_desc: true
+  page_length: 10
+  percent_metrics: []
+  query_mode: aggregate
+  row_limit: 10000
+  server_page_length: 10
+  show_cell_bars: false
+  table_timestamp_format: smart_date
+  time_grain_sqla: P1D
+  time_range: No filter
+  time_range_endpoints:
+  - inclusive
+  - exclusive
+  url_params: {}
+  viz_type: table
+query_context: '{"datasource":{"id":479,"type":"table"},"force":false,"queries":[{"time_range":"No
+  filter","filters":[],"extras":{"time_grain_sqla":"P1D","time_range_endpoints":["inclusive","exclusive"],"having":"","having_druid":[],"where":""},"applied_time_extras":{},"columns":["owner"],"metrics":["count","share_correct_naming"],"orderby":[["count",false]],"annotation_layers":[],"row_limit":10000,"timeseries_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{},"post_processing":[]}],"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: d174580d-6e0a-4935-b711-73d8fc520991
+version: 1.0.0
+dataset_uuid: b4926ff8-d5dc-4669-8bc6-2d5336813f48

@@ -1,0 +1,45 @@
+slice_name: monitoring.superset_virtualized_datasets_by_time
+viz_type: big_number
+params:
+  adhoc_filters:
+  - clause: WHERE
+    comparator: true
+    expressionType: SIMPLE
+    filterOptionName: filter_zmfwdubt79d_hfmmcgpvmpw
+    isExtra: false
+    isNew: false
+    operator: ==
+    operatorId: IS_TRUE
+    sqlExpression: null
+    subject: is_sqllab_view
+  color_picker:
+    a: 1
+    b: 150
+    g: 23
+    r: 68
+  compare_lag: 1
+  compare_suffix: period over period
+  datasource: 478__table
+  extra_form_data: {}
+  granularity_sqla: created_on
+  header_font_size: 0.4
+  metric: count
+  rolling_type: cumsum
+  show_trend_line: true
+  slice_id: 608
+  start_y_axis_at_zero: true
+  subheader_font_size: 0.15
+  time_grain_sqla: P1D
+  time_range: Last quarter
+  time_range_endpoints:
+  - inclusive
+  - exclusive
+  url_params: {}
+  viz_type: big_number
+  y_axis_format: SMART_NUMBER
+query_context: '{"datasource":{"id":478,"type":"table"},"force":false,"queries":[{"time_range":"Last
+  quarter","granularity":"created_on","filters":[{"col":"is_sqllab_view","op":"==","val":true}],"extras":{"time_grain_sqla":"P1D","time_range_endpoints":["inclusive","exclusive"],"having":"","having_druid":[],"where":""},"applied_time_extras":{},"columns":[],"metrics":["count"],"annotation_layers":[],"timeseries_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{}}],"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: 12424bce-2c9d-4d16-a781-5134b6333d53
+version: 1.0.0
+dataset_uuid: ea70f066-003e-4a00-8f9d-a541414978d1
