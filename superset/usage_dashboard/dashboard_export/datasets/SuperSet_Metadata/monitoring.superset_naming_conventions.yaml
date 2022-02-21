@@ -1,0 +1,163 @@
+table_name: monitoring.superset_naming_conventions
+main_dttm_col: null
+description: null
+default_endpoint: null
+offset: 0
+cache_timeout: null
+schema: public
+sql: "with cte_names as (\n  select\n  table_name as name,\n  'virtualized dataset'\
+  \ as source,\n  'published' as status,\n  created_by_fk as created_by_user_id\n\
+  \  from tables\n  where 1=1\n  and is_sqllab_view = true\n  \n  union \n  \n  select\n\
+  \  dashboard_title as name,\n  'dashboard' as source,\n  case \n    when d.published\
+  \ = true then 'published'\n    else 'draft'\n  end as status,\n  du.user_id as created_by_user_id\n\
+  \  from dashboards as d\n  left join dashboard_user as du on d.id=du.dashboard_id\
+  \ \n  \n  union\n  \n  select\n  slice_name as name,\n  'charts' as source,\n  'published'\
+  \ as status,\n  su.user_id as created_by_user_id\n  from slices as s\n  left join\
+  \ slice_user as su on s.id=su.slice_id \n),\n\ncte_names_with_properties as (\n\
+  select \nname,\nsource,\nu.username as owner,\nstatus,\ncase \n  when lower(split_part(name,'.',\
+  \ 1)) = split_part(name,'.', 1) then true\n  else false\nend as domain_is_lowercase,\n\
+  case \n  when lower(name) like '%.%' then true\n  else false\nend as has_dot,\n\
+  case \n  when lower(name) like 'archived%' then true\n  else false\nend as is_archived,\n\
+  split_part(name,'.', 1) as domains,\ncase \n  when lower(name) like '%untitled%'\
+  \ then true\n  when lower(name) ~ '\\d{2}\\/\\d{2}\\/\\d{4}' then true\n  else false\n\
+  end as has_bad_phrases\nfrom cte_names as tmp\nleft join ab_user as u on tmp.created_by_user_id\
+  \ = u.id\n)\n\nselect \n*,\ncase \n  when domain_is_lowercase is true \n   and has_dot\
+  \ is true \n   and has_bad_phrases is false \n   and is_archived is false \n  then\
+  \ true\n  else false\nend as is_valid\nfrom cte_names_with_properties"
+params: null
+template_params: null
+filter_select_enabled: false
+fetch_values_predicate: null
+extra: null
+uuid: b4926ff8-d5dc-4669-8bc6-2d5336813f48
+metrics:
+- metric_name: share_correct_naming
+  verbose_name: ''
+  metric_type: null
+  expression: "1.00 * sum(\n  case\n    when is_valid is true then 1\n    else 0\n\
+    \  end\n)/count(*)"
+  description: null
+  d3format: null
+  extra: {}
+  warning_text: null
+- metric_name: count
+  verbose_name: null
+  metric_type: null
+  expression: count(*)
+  description: null
+  d3format: null
+  extra: {}
+  warning_text: null
+columns:
+- column_name: has_bad_phrases
+  verbose_name: null
+  is_dttm: false
+  is_active: null
+  type: BOOL
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: '{}'
+- column_name: domain_is_lowercase
+  verbose_name: null
+  is_dttm: false
+  is_active: null
+  type: BOOL
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: '{}'
+- column_name: is_archived
+  verbose_name: null
+  is_dttm: false
+  is_active: null
+  type: BOOL
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: '{}'
+- column_name: has_dot
+  verbose_name: null
+  is_dttm: false
+  is_active: null
+  type: BOOL
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: '{}'
+- column_name: is_valid
+  verbose_name: null
+  is_dttm: false
+  is_active: null
+  type: BOOL
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: '{}'
+- column_name: domains
+  verbose_name: null
+  is_dttm: false
+  is_active: null
+  type: STRING
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: '{}'
+- column_name: name
+  verbose_name: null
+  is_dttm: false
+  is_active: null
+  type: STRING
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: '{}'
+- column_name: status
+  verbose_name: null
+  is_dttm: false
+  is_active: null
+  type: STRING
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: '{}'
+- column_name: source
+  verbose_name: null
+  is_dttm: false
+  is_active: null
+  type: STRING
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: '{}'
+- column_name: owner
+  verbose_name: null
+  is_dttm: false
+  is_active: null
+  type: STRING
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: '{}'
+version: 1.0.0
+database_uuid: 06cd566f-e22a-4a79-b0e0-4c947de93ee0
