@@ -1,6 +1,6 @@
 # Overview
 
-This directory contains a connector that aims to keep dbt and Superset in sync. Further info can be found in the [this article](https://).
+This directory contains a connector that aims to keep dbt and Superset in sync. Further info can be found in [this article](https://).
 
 ## How does it work?
 
