@@ -8,6 +8,9 @@ import logging
 import json
 import requests
 from itertools import compress
+import os
+from pathlib import Path
+
 
 def _parse_args(argv):
     """Parses command-line arguments."""
@@ -15,54 +18,59 @@ def _parse_args(argv):
     parser.add_argument(
         '--api_pointer',
         help='''The url for API pointer.''',
-        required=True
+        required=False,
+        default='http://yoururl/api/v1/'
     )
     parser.add_argument(
         '--username',
         help='''Superset API username.''',
-        required=True
+        required=False
     )
     parser.add_argument(
         '--password',
         help='''Superset API password.''',
-        required=True
+        required=False
     )
     parser.add_argument(
         '--client_id',
         help='''Superset API client id.''',
-        required=True
+        required=False
     )
     parser.add_argument(
         '--client_secret',
         help='''Superset API client secret.''',
-        required=True
+        required=False
     )
     parser.add_argument(
         '--token_url',
         help='''The url for the token to grant access.''',
-        required=True
+        required=False,
+        default='https://your.path/token'
     )
     parser.add_argument(
         '--dbt_project_dir_name',
-        help='''The name of the dbt project directory.''',
-        required=True
+        help='''Path to the folder that contains the dbt projects.''',
+        required=False
 
     )
     parser.add_argument(
         '--schema_prefix_name',
         help='''The name of the schema, prefixed to the table names under the schema.''',
-        required=True
+        required=False,
+        default='reporting'
     )
     parser.add_argument(
         '--database_number',
         help='''The number of the database as of Superset.''',
-        required=True,
+        required=False,
+        default=1,
         type=int
     )
     parser.add_argument(
         '--owner_id',
-        help='''The user id of the table's owner.''',
-        required=True,
+        help='''The user id of the tables' owner.''',
+        required=False,
+        default=14,
         type=int
     )
     return parser.parse_args(argv)
@@ -165,13 +173,22 @@ def main():
 
     print('Starting!')
 
-    with open(f'{dbt_project_dir}/target/manifest.json') as f:
-            dbt_manifest = json.load(f)
-    dbt_tables=get_tables_from_dbt(dbt_manifest)
+    dbt_tables={}
+    for file in os.listdir(f'{dbt_project_dir}'):
+        if file.startswith("snowflake_dbt"):
+            dbt_project=f'{dbt_project_dir}/'+file
+            file_path=f'{dbt_project}/target/manifest.json'
+            print(file_path)
+            if Path(file_path).is_file():
+                with open(file_path) as f:
+                    dbt_manifest = json.load(f)
+                dbt_tables_temp=get_tables_from_dbt(dbt_manifest)
+                dbt_tables={**dbt_tables,**dbt_tables_temp}
 
     #Getting the dbt tables keys
     dbt_tables_names=list(dbt_tables.keys())
-
+    print('Tables in manifest')
+    print(len(dbt_tables_names))
     #Only tables that start with a given schema prefix name
 
     mapped = map (lambda x: x.startswith(schema_prefix_name), dbt_tables_names)
