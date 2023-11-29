@@ -1,0 +1,190 @@
+F_Z_SCORE_P_VALUE(FLOAT):
+        comment: "Calculate p value given a z score"
+        null_input_behavior: CALLED ON NULL INPUT
+        return_type: FLOAT
+        language: PYTHON
+        runtime_version: 3.8
+        handler: run_calculations_py
+        packages: [ 'scipy==1.9.3' ]
+        arguments:
+          - name: Z_SCORE
+            type: FLOAT
+        statement: |-
+          import scipy
+
+          # Define main function which runs the actual calculations
+          def run_calculations_py(z_score: float):
+            if(z_score is None):
+              output=1
+            else:
+              output=2*scipy.stats.norm.sf(abs(z_score))
+            return output
+            
+F_SAMPLE_SIZE_PROPORTION_ESTIMATOR(FLOAT, FLOAT, FLOAT, FLOAT):
+  comment: "Estimate sample size for binomial metrics. Cohen h for effect size, similar results can be achieved via https://www.evanmiller.org/ab-testing/sample-size.html"
+  return_type: NUMBER(38,0)
+  language: PYTHON
+  runtime_version: 3.8
+  packages: [ "statsmodels==0.13.2", "numpy==1.25.0" ]
+  handler: sample_size_proportion_estimator
+  arguments:
+    - name: BASELINE_RATIO
+      type: FLOAT
+    - name: RELATIVE_UPLIFT
+      type: FLOAT
+    - name: POWER
+      type: FLOAT
+    - name: ALPHA
+      type: FLOAT
+  statement: |-
+    import statsmodels.api
+    import numpy as np
+
+    def sample_size_proportion_estimator(baseline_ratio,relative_uplift,power,alpha):
+            ## This test is only valid for a test of proportions, the baseline_ratio should be in the interval [0,1] and so should (1+relative_uplif)*baseline_ratio
+            effect = 2.0 * (np.arcsin(np.sqrt((1.0+relative_uplift)*baseline_ratio))-np.arcsin(np.sqrt(baseline_ratio)))
+            output = statsmodels.stats.power.NormalIndPower().solve_power(effect,None,alpha=alpha,power=power,alternative='two-sided')
+            return output
+
+F_T_TEST_P_VALUE(FLOAT, NUMBER):
+        comment: "Calculate p value given a t statistic and degrees of freedom"
+        null_input_behavior: CALLED ON NULL INPUT
+        return_type: FLOAT NOT NULL
+        language: PYTHON
+        runtime_version: 3.8
+        handler: run_calculations_py
+        packages: [ 'scipy==1.9.3' ]
+        arguments:
+          - name: T_STATISTIC
+            type: FLOAT
+          - name: DEGREES_OF_FREEDOM
+            type: NUMBER
+        statement: |-
+          import scipy
+
+          def run_calculations_py(
+              t_statistic: float,
+              degrees_of_freedom: int
+            ):
+            if(t_statistic is None):
+              output=1
+            else:
+              output=2*scipy.stats.t.sf(abs(t_statistic), df=degrees_of_freedom)
+            return output
+
+F_UPLIFT_CONFIDENCE_INTERVAL(FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, VARCHAR, FLOAT):
+        comment: "Estimate confidence interval for the uplift, as of https://blog.analytics-toolkit.com/2018/confidence-intervals-p-values-percent-change-relative-difference/"
+        null_input_behavior: CALLED ON NULL INPUT
+        return_type: FLOAT NOT NULL
+        language: PYTHON
+        runtime_version: 3.8
+        handler: run_calculations_py
+        packages: [ 'scipy==1.9.3' ]
+        arguments:
+          - name: CONFIDENCE_LEVEL
+            type: FLOAT
+          - name: MEAN_1
+            type: FLOAT
+          - name: STDDEV_1
+            type: FLOAT
+          - name: MEAN_2
+            type: FLOAT
+          - name: STDDEV_2
+            type: FLOAT
+          - name: BOUND
+            type: VARCHAR
+          - name: PERCENTAGE_UPLIFT
+            type: FLOAT
+        statement: |-
+          import scipy
+
+          # Define function that goes from confidence level to z value
+          def ci_z_value(level: float):
+              input=0.5+level/2
+              output=scipy.stats.norm.ppf(input)
+              return output
+
+          def boundary_multiplier(bound: str):
+              if bound=="lower":
+                  multiplier=-1
+              elif bound=="upper":
+                  multiplier=+1
+              else:
+                  raise ValueError('Invalid bound definition, should be either lower or upper')
+              return multiplier
+
+          # Define main function which runs the actual calculations
+          def run_calculations_py(
+              confidence_level: float,
+              mean_1: float,
+              stddev_1: float,
+              mean_2: float,
+              stddev_2: float,
+              bound: str,
+              percentage_uplift: float
+            ):
+            variation_coefficient_1=stddev_1/mean_1
+            variation_coefficient_2=stddev_2/mean_2
+
+            variation_coefficient_1_squared=variation_coefficient_1**2
+            variation_coefficient_2_squared=variation_coefficient_2**2
+
+            z_value=ci_z_value(confidence_level)
+            z_value_squared=z_value**2
+
+            sqrt_argument=variation_coefficient_1_squared+variation_coefficient_2_squared-z_value_squared*variation_coefficient_1_squared*variation_coefficient_2_squared
+
+            output=(percentage_uplift+1)*(1+boundary_multiplier(bound)*z_value*sqrt_argument**0.5)/(1-z_value*variation_coefficient_1_squared)-1
+            return output
+
+F_CHI_SQUARED_TEST(NUMBER, NUMBER, NUMBER, NUMBER):
+        comment: "This function calculates p value conducting a chi-square test, as of https://www.evanmiller.org/ab-testing/chi-squared.html"
+        return_type: FLOAT
+        language: PYTHON
+        handler: p_val_calculator
+        runtime_version: 3.8
+        null_input_behavior: CALLED ON NULL INPUT
+        packages: [ "pandas==1.4.3", "statsmodels==0.13.2" ]
+        arguments:
+          - name: TOTAL_USERS
+            type: NUMBER
+          - name: SUCCESSES
+            type: NUMBER
+          - name: TOTAL_USERS_V0
+            type: NUMBER
+          - name: SUCCESSES_V0
+            type: NUMBER
+        statement: |-
+          from scipy.stats import chi2_contingency
+          import numpy as np
+          
+          def p_val_calculator(total_users_v1,successes_v1, total_users_v0, successes_v0):
+              complement_v0=total_users_v0-successes_v0
+              complement_v1=total_users_v1-successes_v1
+              observed = np.array([[successes_v0, complement_v0], [successes_v1, complement_v1]])
+              rate_of_success_v0=successes_v0/(successes_v0+complement_v0)
+              rate_of_success_v1=successes_v1/(successes_v1+complement_v1)
+              output = chi2_contingency(observed,correction=False)[1]
+              return output
+
+F_BINOMIAL_PROPORTION_CONFIDENCE_INTERVALS(NUMBER, NUMBER):
+        comment: "This function calculates the confidence intervals of a binomial variable, as of https://www.evanmiller.org/ab-testing/chi-squared.html"
+        return_type: ARRAY NOT NULL
+        language: PYTHON
+        handler: ci_calculator
+        runtime_version: 3.8
+        null_input_behavior: CALLED ON NULL INPUT
+        packages: [ 'statsmodels==0.13.2' ]
+        arguments:
+          - name: TRIALS
+            type: NUMBER
+          - name: SUCCESSES
+            type: NUMBER
+        statement: |-
+          from statsmodels.stats.proportion import proportion_confint
+
+          def ci_calculator(total_users:int,
+              successes: int
+              ):
+              output=proportion_confint(count=successes, nobs=total_users,method='wilson')
+              return list(output)
