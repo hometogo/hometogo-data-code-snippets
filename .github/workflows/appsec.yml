@@ -1,0 +1,19 @@
+name: appsec
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  appsec:
+    runs-on: self-hosted
+    steps:
+      - name: Run appsec
+        uses: hometogo/actions/appsec/scan@main
+        with:
+          appsec_key: ${{ secrets.ITSECURITY_APPSEC_KEY }}
+          other_data: ${{ secrets.ITSECURITY_BASE64_DAT }}
+          docker_registry: harbor2.hometogo.rocks
+          harbor_username: ${{ secrets.HARBOR_GITHUB_CI_USERNAME }}
+          harbor_password: ${{ secrets.HARBOR_GITHUB_CI_PASSWORD }}
